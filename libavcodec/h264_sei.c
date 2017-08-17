@@ -45,6 +45,7 @@ void ff_h264_sei_uninit(H264SEIContext *h)
     h->picture_timing.dpb_output_delay  = 0;
     h->picture_timing.cpb_removal_delay = -1;
 
+    h->picture_timing.present      = 0;
     h->buffering_period.present    = 0;
     h->frame_packing.present       = 0;
     h->display_orientation.present = 0;
@@ -119,6 +120,8 @@ static int decode_picture_timing(H264SEIPictureTiming *h, GetBitContext *gb,
         av_log(logctx, AV_LOG_DEBUG, "ct_type:%X pic_struct:%d\n",
                h->ct_type, h->pic_struct);
     }
+
+    h->present = 1;
     return 0;
 }
 
@@ -379,6 +382,14 @@ static int decode_green_metadata(H264SEIGreenMetaData *h, GetBitContext *gb)
     return 0;
 }
 
+static int decode_alternative_transfer(H264SEIAlternativeTransfer *h,
+                                       GetBitContext *gb)
+{
+    h->present = 1;
+    h->preferred_transfer_characteristics = get_bits(gb, 8);
+    return 0;
+}
+
 int ff_h264_sei_decode(H264SEIContext *h, GetBitContext *gb,
                        const H264ParamSets *ps, void *logctx)
 {
@@ -433,6 +444,9 @@ int ff_h264_sei_decode(H264SEIContext *h, GetBitContext *gb,
             break;
         case SEI_TYPE_GREEN_METADATA:
             ret = decode_green_metadata(&h->green_metadata, gb);
+            break;
+        case SEI_TYPE_ALTERNATIVE_TRANSFER:
+            ret = decode_alternative_transfer(&h->alternative_transfer, gb);
             break;
         default:
             av_log(logctx, AV_LOG_DEBUG, "unknown SEI type %d\n", type);
