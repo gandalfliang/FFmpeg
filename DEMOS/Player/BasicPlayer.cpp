@@ -1,7 +1,11 @@
 #include <stdio.h>
+
+extern "C"
+{
 #include "libavformat/avformat.h"
 #include "libavcodec/avcodec.h"
 #include "SDL/SDL.h"
+}
 
 int main(int argc, char *argv[])
 {
