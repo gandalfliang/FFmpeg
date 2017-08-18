@@ -19,17 +19,20 @@ extern "C"
 int thread_exit = 0;
 int thread_pause = 0;
 
-int sfp_refresh_thread(void *opaque) {
+int sfp_refresh_thread(void *framerate) {
 	thread_exit = 0;
 	thread_pause = 0;
-
+	
+	AVRational* fpsRational = (AVRational*)framerate;
+	int fps = fpsRational->num / fpsRational->den;
+	int delay = 1.0 / fps * 1000;
 	while (!thread_exit) {
 		if (!thread_pause) {
 			SDL_Event event;
 			event.type = SFM_REFRESH_EVENT;
 			SDL_PushEvent(&event);
 		}
-		SDL_Delay(34);
+		SDL_Delay(delay);
 	}
 	thread_exit = 0;
 	thread_pause = 0;
@@ -43,9 +46,9 @@ int sfp_refresh_thread(void *opaque) {
 
 int main(int argc, char **argv)
 {
-	if (argc < 1)
+	if (argc <= 1)
 		return 1;
-	const char *filePath = argv[1];
+	const char *filePath = "F:\\电影\\后会无期.HD1024高清国语中字.mp4";
 
 	AVFormatContext *pFormatCtx;
 	AVCodecContext *pCodecCtx;
@@ -134,7 +137,7 @@ int main(int argc, char **argv)
 	SDL_Event event;
 	AVFrame *pFrame, *pYuvFrame;
 	AVPacket *pPacket = (AVPacket*)av_malloc(sizeof(AVPacket));
-	SDL_Thread *sdlThread = SDL_CreateThread(sfp_refresh_thread, NULL, NULL);
+	SDL_Thread *sdlThread = SDL_CreateThread(sfp_refresh_thread, NULL, &pCodecCtx->framerate);
 
 	pFrame = av_frame_alloc();
 	pYuvFrame = av_frame_alloc();
