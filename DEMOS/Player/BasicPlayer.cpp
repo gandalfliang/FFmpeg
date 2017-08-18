@@ -1,15 +1,4 @@
-#include <stdio.h>
-
-extern "C"
-{
-#include "libavformat/avformat.h"
-#include "libavcodec/avcodec.h"
-#include "libavutil/imgutils.h"
-#include "libswscale/swscale.h"
-#include "SDL/SDL.h"
-}
-
-#define SDL_main main
+#include "demoplayer.h"
 
 //Refresh Event  
 #define SFM_REFRESH_EVENT  (SDL_USEREVENT + 1)  
@@ -44,11 +33,11 @@ int sfp_refresh_thread(void *framerate) {
 	return 0;
 }
 
-int main(int argc, char **argv)
+int main1(int argc, char **argv)
 {
 	if (argc <= 1)
 		return 1;
-	const char *filePath = "F:\\电影\\后会无期.HD1024高清国语中字.mp4";
+	const char *filePath = argv[1];
 
 	AVFormatContext *pFormatCtx;
 	AVCodecContext *pCodecCtx;
